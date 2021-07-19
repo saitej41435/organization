@@ -1,6 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
-import {Employees} from './shared/employee'
+import Employees from './shared/employee'
+import Teams from './shared/teams'
 import HeadsComponent from './components/HeadComponent'
 import TeamComponent from './components/TeamComponent'
 import EmployeeComponent from './components/EmployeeComponent'
@@ -12,33 +13,37 @@ export const EmployeeContext = React.createContext()
 function App() {
   const ceo = Employees.filter(employee =>employee.level===1)[0]
   const heads = Employees.filter(employee => employee.level === 2)
-  // const employees = Employees.map(employee=><li key={employee.id}>{employee.name}</li>)
-  const [allEmployees,setAllEmployees] = useState(Employees)
-  const [selectedEmployees, setEmployees] = useState(null)
-  const [selectedTeam, setTeam] = useState(null)
+  const [employees,setEmployees] = useState(Employees)
+  const [selectedFilter, setFilter] = useState(null)
+  const [teams,setTeams] = useState(Teams)
 
-  const updateTeam = (team)=> setTeam(team)
+  const updateFilter = (filter)=> setFilter(filter)
 
   useEffect(()=>{
-    console.log(allEmployees)
-    selectedTeam && setEmployees(allEmployees.filter(employee=>employee.team===selectedTeam),console.log(allEmployees))
-  },[allEmployees,selectedTeam])
-
-  // useEffect(()=>{
-  //   selectedTeam && setEmployees(Employees.filter(employee=>employee.team===selectedTeam))
-  // },[Employees])
+    
+    if(selectedFilter){
+      const teams = Teams.filter(t=>t.department===selectedFilter.department).map(team=>team.name)
+      // const teams = selectedFilter ? Teams.filter(team=>team.department===filter.department).map(team=>team.name) : teams
+      if(teams.length){
+        const employees= Employees.filter(employee=>teams.includes(employee.team) || employee.department===selectedFilter.department)
+        setEmployees(employees)
+        setTeams(teams)
+      }
+      else{
+          setEmployees(Employees.filter(employee=>employee.team===selectedFilter.team))
+          setTeams(null)
+        }
+    }
+  },[selectedFilter])
 
   return (
     <div className="App">
       <div className='row mt-5'>
         <div className='col-4'>
-          <HeadsComponent ceo={ceo} heads={heads} setTeam={updateTeam} selectedTeam={selectedTeam} />
+          <HeadsComponent ceo={ceo} heads={heads} setFilter={updateFilter} selectedFilter={selectedFilter} />
         </div>
-          {selectedEmployees &&  selectedTeam && <div className='col-8'>
-            <EmployeeContext.Provider value={setAllEmployees} >
-              < EmployeeComponent employees={selectedEmployees} team={selectedTeam} />
-            </EmployeeContext.Provider>
-            
+          {selectedFilter && <div className='col-8'>
+              < EmployeeComponent filter={selectedFilter} employees={employees}  teams={teams}/>
             </div>
           }
       </div>

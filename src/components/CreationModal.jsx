@@ -10,7 +10,7 @@ export function CreateModal(props){
         <Modal isOpen={modal} toggle={toggle} >
             <ModalHeader toggle={toggle}>{header}</ModalHeader>
                 <ModalBody>
-                   {form}
+                   {props.children}
                 </ModalBody>
         </Modal>
     )
